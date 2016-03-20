@@ -16,37 +16,47 @@ class ViewController: UIViewController {
     var opera_num : Int = 0
     var total :Double = 0.0
     var dot : Bool = false
-    var neg : Bool = false
+    var zero_neg : Bool = false
     
     @IBAction func addNumber(sender: UIButton) {
         func append(digit: Int) {
             
-            if let text = numPad.text where Double(text) != 0.0 {
+            if let text = numPad.text where Double(text)! != 0.0 {
                 numPad.text = text + "\(digit)"
             } else {
                 numPad.text = (digit as NSNumber).stringValue
             }
         }
         
-        if(opera_num == 5){
+        
+        guard !dot else{
+            if(opera_num == 5){
+                opera_num = 0
+            }
+            numPad.text! = "\(numPad.text!)\(sender.tag)"
+            return
+            
+        }
+        
+        guard opera_num != 5 else{
+                
             numPad.text = (sender.tag as NSNumber).stringValue
             opera_num = 0
+            return
+        }
+        
+        
+        guard !zero_neg else{
             
-        }else{
-            if(dot){
+            numPad.text! = "-\(sender.tag)"
+            zero_neg = false
+            return
                 
-                numPad.text! = "\(numPad.text!)\(sender.tag)"
-                dot = false
-            }else if(neg){
-                numPad.text! = "-\(sender.tag)"
-                neg = false
-            }else{
-                if(sender.tag >= 0 && sender.tag < 10){
-                    append(sender.tag)
-                }
-            }
-
-            
+        }
+        
+        
+        if(sender.tag >= 0 && sender.tag < 10){
+            append(sender.tag)
         }
 
         
@@ -54,17 +64,27 @@ class ViewController: UIViewController {
     
 
     @IBAction func clickOperator(sender: UIButton) {
-        //判斷是哪個運算子
+        
         let operator_text :String = sender.titleLabel!.text!
         
-        //單純讓字面歸零
-        func clear(){
-            numPad.text = "0.0"
+        guard var num_pad_text = numPad.text else{
+            print("NoNumberError")
+            return
         }
         
-        //計算之前的結果
+        guard var num_pad_number = Double(num_pad_text) else{
+            print("NotDoubleError")
+            return
+        }
+
+        func clear(){
+            numPad.text = "0"
+        }
+        
         func calculate(number:Double){
-            print(total)
+            
+            dot = false
+            
             switch opera_num{
             case 0:
                 total = number
@@ -81,37 +101,33 @@ class ViewController: UIViewController {
             }
         }
         
-        
-        guard var num_pad_text = numPad.text else{
-            print("NoNumberError")
-            return
-        }
-        
-        guard var num_pad_number = Double(num_pad_text) else{
-            print("NotDoubleError")
-            return
-        }
-    
+
         switch operator_text {
         case "AC":
             clear()
             opera_num = 0
             total = 0.0
             dot = false
-            neg = false
+            zero_neg = false
         case "C":
-            clear()
+            numPad.text = String(num_pad_text.characters.dropLast())
         case "+":
             calculate(num_pad_number)
             opera_num = 1
             clear()
         case "-":
-            if(num_pad_number == 0.0){
-                neg = true
+            
+            guard num_pad_number != 0.0 else {
+                //0+(-3),the minus number will appear because the nag,if opera_num = 2,then 0-(-3) is wrong
+                opera_num = 1
+                zero_neg = true
+                return
             }
+            
             calculate(num_pad_number)
             opera_num = 2
             clear()
+
         case "×":
             calculate(num_pad_number)
             opera_num = 3
@@ -123,8 +139,17 @@ class ViewController: UIViewController {
         case "=":
             calculate(num_pad_number)
             opera_num = 5
+            var total_string = "\(total)"
+            guard total_string.hasSuffix(".0") == false else{
+                let range = total_string.endIndex.advancedBy(-2)..<total_string.endIndex
+                total_string.removeRange(range)
+                numPad.text = total_string
+                return
+            }
+            
             numPad.text = "\(total)"
         case "+/-":
+            //if no - ,add -;if has -,remove -
             if(num_pad_text.rangeOfString("-") == nil){
                 
                 num_pad_text = "-\(num_pad_text)"
@@ -136,10 +161,12 @@ class ViewController: UIViewController {
             num_pad_number = num_pad_number/100
             numPad.text = "\(num_pad_number)"
         case ".":
+            //if no dot,add the dot
             if(num_pad_text.rangeOfString(".") == nil){
                 num_pad_text = "\(num_pad_text)."
+                dot = true
             }
-            dot = true
+            
             numPad.text = num_pad_text
         
         default:
