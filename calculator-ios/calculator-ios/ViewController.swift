@@ -13,10 +13,10 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var numPad: UILabel!
     
-    var opera_num : Int = 0
-    var total :Double = 0.0
-    var dot : Bool = false
-    var zero_neg : Bool = false
+    var operaNum: Int = 0
+    var total: Double = 0.0
+    var dot: Bool = false
+    var zero_neg: Bool = false
     
     @IBAction func addNumber(sender: UIButton) {
         func append(digit: Int) {
@@ -30,18 +30,18 @@ class ViewController: UIViewController {
         
         
         guard !dot else{
-            if(opera_num == 5){
-                opera_num = 0
+            if operaNum == 5 {
+                operaNum = 0
             }
             numPad.text! = "\(numPad.text!)\(sender.tag)"
             return
             
         }
         
-        guard opera_num != 5 else{
+        guard operaNum != 5 else{
                 
             numPad.text = (sender.tag as NSNumber).stringValue
-            opera_num = 0
+            operaNum = 0
             return
         }
         
@@ -55,7 +55,7 @@ class ViewController: UIViewController {
         }
         
         
-        if(sender.tag >= 0 && sender.tag < 10){
+        if sender.tag >= 0 && sender.tag < 10 {
             append(sender.tag)
         }
 
@@ -65,7 +65,7 @@ class ViewController: UIViewController {
 
     @IBAction func clickOperator(sender: UIButton) {
         
-        let operator_text :String = sender.titleLabel!.text!
+        let operator_text: String = sender.titleLabel!.text!
         
         guard var num_pad_text = numPad.text else{
             print("NoNumberError")
@@ -85,7 +85,7 @@ class ViewController: UIViewController {
             
             dot = false
             
-            switch opera_num{
+            switch operaNum{
             case 0:
                 total = number
             case 1:
@@ -105,7 +105,7 @@ class ViewController: UIViewController {
         switch operator_text {
         case "AC":
             clear()
-            opera_num = 0
+            operaNum = 0
             total = 0.0
             dot = false
             zero_neg = false
@@ -113,32 +113,32 @@ class ViewController: UIViewController {
             numPad.text = String(num_pad_text.characters.dropLast())
         case "+":
             calculate(num_pad_number)
-            opera_num = 1
+            operaNum = 1
             clear()
         case "-":
             
             guard num_pad_number != 0.0 else {
-                //0+(-3),the minus number will appear because the nag,if opera_num = 2,then 0-(-3) is wrong
-                opera_num = 1
+                //0+(-3),the minus number will appear because the nag,if operaNum = 2,then 0-(-3) is wrong
+                operaNum = 1
                 zero_neg = true
                 return
             }
             
             calculate(num_pad_number)
-            opera_num = 2
+            operaNum = 2
             clear()
 
         case "×":
             calculate(num_pad_number)
-            opera_num = 3
+            operaNum = 3
             clear()
         case "÷":
             calculate(num_pad_number)
-            opera_num = 4
+            operaNum = 4
             clear()
         case "=":
             calculate(num_pad_number)
-            opera_num = 5
+            operaNum = 5
             var total_string = "\(total)"
             guard total_string.hasSuffix(".0") == false else{
                 let range = total_string.endIndex.advancedBy(-2)..<total_string.endIndex
@@ -150,7 +150,7 @@ class ViewController: UIViewController {
             numPad.text = "\(total)"
         case "+/-":
             //if no - ,add -;if has -,remove -
-            if(num_pad_text.rangeOfString("-") == nil){
+            if num_pad_text.rangeOfString("-") == nil {
                 
                 num_pad_text = "-\(num_pad_text)"
             }else{
@@ -162,7 +162,7 @@ class ViewController: UIViewController {
             numPad.text = "\(num_pad_number)"
         case ".":
             //if no dot,add the dot
-            if(num_pad_text.rangeOfString(".") == nil){
+            if num_pad_text.rangeOfString(".") == nil {
                 num_pad_text = "\(num_pad_text)."
                 dot = true
             }
